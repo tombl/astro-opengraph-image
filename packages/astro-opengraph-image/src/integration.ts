@@ -8,6 +8,7 @@ import { ELEMENT_NODE, transform, walk } from "ultrahtml";
 import { convert } from "./convert";
 
 export interface Options {
+  background?: string;
   width: number;
   height: number;
   scale: number;

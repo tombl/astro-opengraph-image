@@ -6,6 +6,7 @@ import { readFile } from "node:fs/promises";
 export default defineConfig({
   integrations: [
     ogImage({
+      background: "#111",
       width: 1200,
       height: 630,
       scale: 3,

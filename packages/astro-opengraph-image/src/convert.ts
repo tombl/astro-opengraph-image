@@ -19,6 +19,7 @@ export async function convert(url: URL, options: Options) {
   const image = await renderAsync(svg, {
     fitTo: { mode: "zoom", value: options.scale },
     font: { loadSystemFonts: false },
+    background: options.background,
   });
 
   return image.asPng();
