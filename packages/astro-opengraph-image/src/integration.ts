@@ -19,10 +19,18 @@ export default function ogImage(options: Options): AstroIntegration {
   return {
     name: "og-image",
     hooks: {
-      "astro:config:setup"({ addMiddleware, addDevToolbarApp, updateConfig }) {
-        addMiddleware({
-          order: "pre",
-          entrypoint: new URL("./middleware.ts", import.meta.url),
+      "astro:config:setup"({
+        injectRoute,
+        addDevToolbarApp,
+        updateConfig,
+        command,
+      }) {
+        if (command !== "dev") return;
+
+        injectRoute({
+          pattern: "/_og",
+          entrypoint: new URL("./route.ts", import.meta.url),
+          prerender: false,
         });
         addDevToolbarApp({
           id: "og-image",
@@ -72,18 +80,22 @@ export default function ogImage(options: Options): AstroIntegration {
                       const url = new URL(
                         node.attributes.content.replaceAll("&#38;", "&"),
                       );
-                      if (url.pathname === "/_og") {
-                        const png = await convert(url, options);
-                        const hash = createHash("sha256")
-                          .update(png)
-                          .digest("base64url")
-                          .slice(0, 12);
-                        await writeFile(new URL(`${hash}.png`, ogDir), png);
-                        node.attributes.content = new URL(
-                          `/_og/${hash}.png`,
-                          url,
-                        ).href;
-                      }
+                      if (url.pathname !== "/_og") return;
+
+                      const png = await convert(url, options);
+                      if (!png) return;
+
+                      const hash = createHash("sha256")
+                        .update(png)
+                        .digest("base64url")
+                        .slice(0, 12);
+
+                      await writeFile(new URL(`${hash}.png`, ogDir), png);
+
+                      node.attributes.content = new URL(
+                        `/_og/${hash}.png`,
+                        url,
+                      ).href;
                     }
                   });
                   return doc;

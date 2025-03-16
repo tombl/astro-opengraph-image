@@ -1,19 +1,19 @@
-import { defineMiddleware } from "astro:middleware";
+import type { APIContext } from "astro";
 import { parse } from "devalue";
+import { convert } from "./convert";
 import type { Options } from "./integration";
 
 // @ts-expect-error
 import options_ from "og-image:config";
-import { convert } from "./convert";
 
 const options = parse(options_) as Options;
 
-export const onRequest = defineMiddleware(async (context, next) => {
-  if (context.url.pathname !== "/_og") return next();
+export async function GET(context: APIContext) {
   const png = await convert(context.url, options);
+  if (!png) return new Response(null, { status: 400 });
   return new Response(png, {
     headers: {
       "Content-Type": "image/png",
     },
   });
-});
+}

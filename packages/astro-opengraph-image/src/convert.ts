@@ -6,7 +6,10 @@ import type { Options } from "./integration";
 
 export async function convert(url: URL, options: Options) {
   const data = url.searchParams.get("html");
-  if (data === null) throw new Error("Missing html search param");
+  if (data === null) {
+    console.warn("Missing html search param");
+    return null;
+  }
 
   const markup = lz.decompressFromEncodedURIComponent(data);
 
