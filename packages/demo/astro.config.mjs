@@ -1,11 +1,11 @@
 import { defineConfig } from "astro/config";
 
-import ogImage from "astro-opengraph-image";
+import opengraphImage from "astro-opengraph-image";
 import { readFile } from "node:fs/promises";
 
 export default defineConfig({
   integrations: [
-    ogImage({
+    opengraphImage({
       background: "#111",
       width: 1200,
       height: 630,

@@ -20,12 +20,12 @@ npm install @fontsource/inter
 ```javascript
 // then, update your astro.config.{mjs|ts} file to configure the integration:
 import { defineConfig } from "astro/config";
-import ogImage from "astro-opengraph-image";
+import opengraphImage from "astro-opengraph-image";
 import { readFile } from "node:fs/promises";
 
 export default defineConfig({
   integrations: [
-    ogImage({
+    opengraphImage({
       // what size do you want your images to be?
       // 1200x630 is a good default across platforms,
       // and 3x scale is a convenient choice.
