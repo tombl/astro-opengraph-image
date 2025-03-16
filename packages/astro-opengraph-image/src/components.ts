@@ -1,1 +1,1 @@
-export { default as OgImage } from './OgImage.astro'
+export { default as OgImage } from "./OgImage.astro";

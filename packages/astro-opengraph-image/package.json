@@ -1,34 +1,34 @@
 {
-	"name": "astro-opengraph-image",
-	"version": "0.1.0",
-	"description": "(hopefully) the easiest way to generate OpenGraph images from your astro site",
-	"keywords": [
-		"astro-component",
-		"astro-integration",
-		"image"
-	],
-	"homepage": "https://github.com/tombl/astro-opengraph-image",
-	"repository": {
-		"url": "git+https://github.com/tombl/astro-opengraph-image.git"
-	},
-	"license": "MIT",
-	"type": "module",
-	"exports": {
-		".": "./src/integration.ts",
-		"./components": "./src/components.ts"
-	},
-	"files": [
-		"src"
-	],
-	"dependencies": {
-		"@resvg/resvg-js": "^2.6.2",
-		"devalue": "^5.1.1",
-		"lz-string": "^1.5.0",
-		"satori": "^0.12.1",
-		"satori-html": "^0.3.2",
-		"ultrahtml": "^1.5.3"
-	},
-	"peerDependencies": {
-		"astro": "^5.5.2"
-	}
+  "name": "astro-opengraph-image",
+  "version": "0.1.0",
+  "description": "(hopefully) the easiest way to generate OpenGraph images from your astro site",
+  "keywords": [
+    "astro-component",
+    "astro-integration",
+    "image"
+  ],
+  "homepage": "https://github.com/tombl/astro-opengraph-image",
+  "repository": {
+    "url": "git+https://github.com/tombl/astro-opengraph-image.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/integration.ts",
+    "./components": "./src/components.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "devalue": "^5.1.1",
+    "lz-string": "^1.5.0",
+    "satori": "^0.12.1",
+    "satori-html": "^0.3.2",
+    "ultrahtml": "^1.5.3"
+  },
+  "peerDependencies": {
+    "astro": "^5.5.2"
+  }
 }
