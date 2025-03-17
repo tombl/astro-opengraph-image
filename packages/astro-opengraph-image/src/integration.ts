@@ -4,7 +4,8 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import type { Font } from "satori";
-import { ELEMENT_NODE, transform, walk } from "ultrahtml";
+import type { Plugin } from "vite";
+import { ELEMENT_NODE, transform, walk, type Node } from "ultrahtml";
 import { convert } from "./convert";
 
 export interface Options {
@@ -44,23 +45,7 @@ export default function ogImage(options: Options): AstroIntegration {
         });
         updateConfig({
           vite: {
-            plugins: [
-              {
-                name: "og-image:config",
-                resolveId(id) {
-                  if (id === "og-image:config") {
-                    return "\0og-image:config";
-                  }
-                },
-                load(id) {
-                  if (id === "\0og-image:config") {
-                    return `export default ${
-                      JSON.stringify(stringify(options))
-                    }`;
-                  }
-                },
-              },
-            ],
+            plugins: [vitePluginVirtualOptions(options)],
           },
         });
       },
@@ -70,48 +55,69 @@ export default function ogImage(options: Options): AstroIntegration {
         await Promise.all(
           [...assets]
             .flatMap(([, files]) => files)
-            .map(async (url) => {
-              const file = fileURLToPath(url);
-              const content = await readFile(file, "utf8");
-
-              const transformed = await transform(content, [
-                async (doc) => {
-                  await walk(doc, async (node) => {
-                    if (
-                      node.type === ELEMENT_NODE &&
-                      node.name.toLowerCase() === "meta" &&
-                      node.attributes.property === "og:image"
-                    ) {
-                      const url = new URL(
-                        node.attributes.content.replaceAll("&#38;", "&"),
-                      );
-                      if (url.pathname !== "/_og") return;
-
-                      const png = await convert(url, options);
-                      if (!png) return;
-
-                      const hash = createHash("sha256")
-                        .update(png)
-                        .digest("base64url")
-                        .slice(0, 12);
-
-                      await mkdir(ogDir, { recursive: true });
-                      await writeFile(new URL(`${hash}.png`, ogDir), png);
-
-                      node.attributes.content = new URL(
-                        `/_og/${hash}.png`,
-                        url,
-                      ).href;
-                    }
-                  });
-                  return doc;
-                },
-              ]);
-
-              await writeFile(file, transformed);
-            }),
+            .map((file) =>
+              transformFilePostBuild(fileURLToPath(file), options, ogDir),
+            ),
         );
       },
     },
   };
+}
+
+function vitePluginVirtualOptions(options: Options): Plugin {
+  return {
+    name: "og-image:config",
+    resolveId(id) {
+      if (id === "og-image:config") {
+        return "\0og-image:config";
+      }
+    },
+    load(id) {
+      if (id === "\0og-image:config") {
+        return `export default ${JSON.stringify(stringify(options))}`;
+      }
+    },
+  };
+}
+
+async function transformFilePostBuild(
+  file: string,
+  options: Options,
+  ogDir: URL,
+) {
+  const content = await readFile(file, "utf8");
+  const transformed = await transform(content, [ogTransformer]);
+  await writeFile(file, transformed);
+
+  async function ogTransformer(doc: Node) {
+    function match(node: Node) {
+      if (
+        node.type === ELEMENT_NODE &&
+        node.name.toLowerCase() === "meta" &&
+        node.attributes.property === "og:image"
+      ) {
+        const url = new URL(node.attributes.content.replaceAll("&#38;", "&"));
+        if (url.pathname === "/_og") return url;
+      }
+    }
+
+    await walk(doc, async (node) => {
+      const url = match(node);
+      if (!url) return;
+
+      const png = await convert(url, options);
+      if (!png) return;
+
+      const hash = createHash("sha256")
+        .update(png)
+        .digest("base64url")
+        .slice(0, 12);
+
+      await mkdir(ogDir, { recursive: true });
+      await writeFile(new URL(`${hash}.png`, ogDir), png);
+
+      node.attributes.content = new URL(`/_og/${hash}.png`, url).href;
+    });
+    return doc;
+  }
 }
