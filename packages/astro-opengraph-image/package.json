@@ -29,6 +29,6 @@
     "ultrahtml": "^1.5.3"
   },
   "peerDependencies": {
-    "astro": "^5.5.2"
+    "astro": "^4.0.0 || ^5.0.0"
   }
 }
