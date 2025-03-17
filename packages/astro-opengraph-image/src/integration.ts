@@ -50,7 +50,9 @@ export default function ogImage(options: Options): AstroIntegration {
                 },
                 load(id) {
                   if (id === "\0og-image:config") {
-                    return `export default ${JSON.stringify(stringify(options))}`;
+                    return `export default ${
+                      JSON.stringify(stringify(options))
+                    }`;
                   }
                 },
               },
@@ -60,7 +62,6 @@ export default function ogImage(options: Options): AstroIntegration {
       },
       async "astro:build:done"({ assets, dir }) {
         const ogDir = new URL("_og/", dir);
-        await mkdir(ogDir, { recursive: true });
 
         await Promise.all(
           [...assets]
@@ -90,6 +91,7 @@ export default function ogImage(options: Options): AstroIntegration {
                         .digest("base64url")
                         .slice(0, 12);
 
+                      await mkdir(ogDir, { recursive: true });
                       await writeFile(new URL(`${hash}.png`, ogDir), png);
 
                       node.attributes.content = new URL(
