@@ -24,8 +24,12 @@ export default function ogImage(options: Options): AstroIntegration {
         addDevToolbarApp,
         updateConfig,
         command,
+        config,
       }) {
-        if (command !== "dev") return;
+        // if we're in dev, or have an ssr adapter, we are allowed to emit
+        // the _og route. in the case of a truly static build, injectRoute will fail
+        // but is not necessary given we'll traverse the output anyway.
+        if (command !== "dev" && !config.adapter) return;
 
         injectRoute({
           pattern: "/_og",
