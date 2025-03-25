@@ -26,6 +26,9 @@ import { readFile } from "node:fs/promises";
 export default defineConfig({
   integrations: [
     opengraphImage({
+      // what color do you want your background to be?
+      background: "#000000",
+
       // what size do you want your images to be?
       // 1200x630 is a good default across platforms,
       // and 3x scale is a convenient choice.

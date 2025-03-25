@@ -9,7 +9,7 @@ import { ELEMENT_NODE, transform, walk, type Node } from "ultrahtml";
 import { convert } from "./convert";
 
 export interface Options {
-  background?: string;
+  background: string;
   width: number;
   height: number;
   scale: number;
