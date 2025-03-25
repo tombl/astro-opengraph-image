@@ -2,23 +2,31 @@
 
 > (hopefully) the easiest way to generate [OpenGraph](https://ogp.me/) images from your Astro site
 
-define your OpenGraph image in directly html, inline in your Astro components.
+Define your OpenGraph image with HTML/CSS, inline in your Astro components.
 
-complete with a helpful toolbar app to display your image in development.
+<figure>
 
-## getting started
+![the Astro toolbar with a preview of an OpenGraph image](https://github.com/user-attachments/assets/b7719263-3d48-484a-a30f-43c91cceac90)
+
+<figcaption>
+Complete with a helpful toolbar app to display your image in development.
+</figcaption>
+
+</figure>
+
+## Getting Started
 
 ```sh
-# first, run this command to install the integration:
+# First, run this command to install the integration:
 npx astro add astro-opengraph-image
 
-# next, you will want one or more fonts to use in your images,
+# Next, you will want one or more fonts to use in your images,
 # I like the fonts available at https://www.npmjs.com/org/fontsource, e.g.:
 npm install @fontsource/inter
 ```
 
 ```javascript
-// then, update your astro.config.{mjs|ts} file to configure the integration:
+// Then, update your astro.config.{mjs|ts} file to configure the integration:
 import { defineConfig } from "astro/config";
 import opengraphImage from "astro-opengraph-image";
 import { readFile } from "node:fs/promises";
@@ -63,7 +71,7 @@ export default defineConfig({
 
 ```astro
 ---
-// lastly, inside your <head>, render the OgImage component to
+// Lastly, inside your <head>, render the OgImage component to
 // specify what you want in your image:
 
 import { OgImage } from "astro-opengraph-image/components";
@@ -90,14 +98,13 @@ import { OgImage } from "astro-opengraph-image/components";
 
 > [!NOTE]
 >
-> your image is only influenced by code inside the `<OgImage>` tag.
+> Your image is only influenced by code inside the `<OgImage>` tag.
+> This means all relevant styles must live inside the tag.
 >
-> this means all relevant styles must live inside the tag.
->
-> additionally, your styles must always have the `is:inline` attribute to convince Astro
-> not to modify or hoist your styles.
+> Additionally, your styles must always have the `is:inline` attribute to convince Astro
+> not to modify or hoist them.
 
 > [!NOTE]
 >
-> astro-opengraph-image is based on the Satori html layout engine, and thus inherits
-> [the subset of CSS it supports.](https://github.com/vercel/satori/blob/main/README.md#css)
+> astro-opengraph-image uses the [Satori](https://github.com/vercel/satori/) HTML layout engine
+> and therefore supports the [subset of HTML/CSS that Satori implements](https://github.com/vercel/satori/blob/main/README.md#css).
