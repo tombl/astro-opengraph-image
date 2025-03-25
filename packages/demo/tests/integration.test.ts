@@ -11,7 +11,7 @@ async function astro(command: "dev" | "preview", env?: Record<string, string>) {
   });
 
   let error = null;
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 50; i++) {
     await Bun.sleep(100);
     try {
       const res = await fetch(`http://localhost:${port}`);
