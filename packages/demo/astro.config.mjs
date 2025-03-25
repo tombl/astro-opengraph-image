@@ -1,9 +1,20 @@
 import { defineConfig } from "astro/config";
+import node from "@astrojs/node";
+import cloudflare from "@astrojs/cloudflare";
 
 import opengraphImage from "astro-opengraph-image";
 import { readFile } from "node:fs/promises";
 
 export default defineConfig({
+  site: "https://mysite.example",
+
+  output: process.env.OG_TEST_OUTPUT ?? "static",
+  adapter: {
+    none: () => undefined,
+    node: () => node({ mode: "standalone" }),
+    cloudflare: () => cloudflare({}),
+  }[process.env.OG_TEST_ADAPTER ?? "none"](),
+
   integrations: [
     opengraphImage({
       background: "#111",
