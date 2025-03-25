@@ -1,0 +1,22 @@
+---
+import { OgImage } from "astro-opengraph-image/components";
+---
+
+<!doctype html>
+<html>
+  <head>
+    <title>the page</title>
+    <OgImage>
+      <h1>entity&amp;test</h1>
+      <p>{"a<>=^&z"}</p>
+      <style is:inline>
+        * {
+          color: white;
+        }
+      </style>
+    </OgImage>
+  </head>
+  <body>
+    <h1>entity&amp;test</h1>
+  </body>
+</html>

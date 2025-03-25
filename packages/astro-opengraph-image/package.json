@@ -26,6 +26,7 @@
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "devalue": "^5.1.1",
+    "entities": "^6.0.0",
     "lz-string": "^1.5.0",
     "satori": "^0.12.1",
     "satori-html": "^0.3.2",
