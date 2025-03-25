@@ -1,6 +1,6 @@
 {
   "name": "astro-opengraph-image",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "(hopefully) the easiest way to generate OpenGraph images from your astro site",
   "keywords": [
     "astro-component",
