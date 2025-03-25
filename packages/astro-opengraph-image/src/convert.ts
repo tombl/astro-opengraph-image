@@ -1,8 +1,28 @@
 import { renderAsync } from "@resvg/resvg-js";
+import { decodeHTML } from "entities";
 import lz from "lz-string";
 import satori from "satori";
 import { html } from "satori-html";
 import type { Options } from "./integration";
+
+interface VNode {
+  type: string;
+  props: {
+    style?: Record<string, any>;
+    children?: string | VNode | VNode[];
+    [prop: string]: any;
+  };
+}
+
+function decodeEntities(node: VNode) {
+  if (typeof node.props.children === "string") {
+    node.props.children = decodeHTML(node.props.children);
+  } else if (Array.isArray(node.props.children)) {
+    node.props.children.forEach(decodeEntities);
+  } else if (node.props.children) {
+    decodeEntities(node.props.children);
+  }
+}
 
 export async function convert(url: URL, options: Options) {
   const data = url.searchParams.get("html");
@@ -13,7 +33,11 @@ export async function convert(url: URL, options: Options) {
 
   const markup = lz.decompressFromEncodedURIComponent(data);
 
-  const svg = await satori(html(markup), {
+  const root: VNode = html(markup);
+
+  decodeEntities(root);
+
+  const svg = await satori(root, {
     width: options.width / options.scale,
     height: options.height / options.scale,
     fonts: options.fonts,
