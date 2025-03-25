@@ -11,6 +11,9 @@
   "repository": {
     "url": "git+https://github.com/tombl/astro-opengraph-image.git"
   },
+  "scripts": {
+    "check": "astro check"
+  },
   "license": "MIT",
   "type": "module",
   "exports": {
