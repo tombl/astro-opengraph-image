@@ -1,3 +1,4 @@
+import { HTMLRewriter } from "@worker-tools/html-rewriter/base64";
 import type { AstroIntegration } from "astro";
 import { stringify } from "devalue";
 import { createHash } from "node:crypto";
@@ -5,7 +6,6 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import type { Font } from "satori";
 import type { Plugin } from "vite";
-import { ELEMENT_NODE, transform, walk, type Node } from "ultrahtml";
 import { convert } from "./convert";
 
 export interface Options {
@@ -85,39 +85,31 @@ async function transformFilePostBuild(
   options: Options,
   ogDir: URL,
 ) {
-  const content = await readFile(file, "utf8");
-  const transformed = await transform(content, [ogTransformer]);
-  await writeFile(file, transformed);
+  const rewriter = new HTMLRewriter();
 
-  async function ogTransformer(doc: Node) {
-    function match(node: Node) {
-      if (
-        node.type === ELEMENT_NODE &&
-        node.name.toLowerCase() === "meta" &&
-        node.attributes.property === "og:image"
-      ) {
-        const url = new URL(node.attributes.content.replaceAll("&#38;", "&"));
-        if (url.pathname === "/_og") return url;
-      }
-    }
+  rewriter.on('meta[property="og:image"]', {
+    // unfortunately this distribution of htmlrewriter is missing types
+    // for the element handlers, so we just specify any.
+    async element(element: any) {
+      const content = element.getAttribute("content");
+      if (!content) return;
 
-    await walk(doc, async (node) => {
-      const url = match(node);
-      if (!url) return;
+      const url = new URL(content);
+      if (url.pathname !== "/_og") return;
 
       const png = await convert(url, options);
       if (!png) return;
 
-      const hash = createHash("sha256")
-        .update(png)
-        .digest("base64url")
-        .slice(0, 12);
+      const hash = createHash("sha256").update(png).digest("base64url");
 
       await mkdir(ogDir, { recursive: true });
       await writeFile(new URL(`${hash}.png`, ogDir), png);
 
-      node.attributes.content = new URL(`/_og/${hash}.png`, url).href;
-    });
-    return doc;
-  }
+      element.setAttribute("content", new URL(`/_og/${hash}.png`, url).href);
+    },
+  });
+
+  const input = await readFile(file, "utf-8");
+  const output = rewriter.transform(new Response(input));
+  await writeFile(file, await output.text());
 }
