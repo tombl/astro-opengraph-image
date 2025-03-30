@@ -26,11 +26,14 @@
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@worker-tools/html-rewriter": "^0.1.0-pre.19",
+    "css-select": "^5.1.0",
     "devalue": "^5.1.1",
+    "domhandler": "^5.0.3",
     "entities": "^6.0.0",
+    "htmlparser2": "^10.0.0",
     "lz-string": "^1.5.0",
-    "satori": "^0.12.1",
-    "satori-html": "^0.3.2"
+    "postcss": "^8.5.3",
+    "satori": "^0.12.1"
   },
   "peerDependencies": {
     "astro": "^4.0.0 || ^5.0.0"
