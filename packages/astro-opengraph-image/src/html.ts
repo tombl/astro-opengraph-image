@@ -68,7 +68,10 @@ export function html(markup: string): VNode {
         props: {
           ...node.attribs,
           children: node.childNodes.map(nodeToVnode),
-          style: { ...styles.get(node) }, // TODO: style attributes
+          style: {
+            ...styles.get(node),
+            ...parseStyleAttribute(node.attribs.style),
+          },
         },
       };
     } else if (isText(node)) {
@@ -79,4 +82,14 @@ export function html(markup: string): VNode {
 
     throw new Error("unhandled node type");
   }
+}
+
+function parseStyleAttribute(style = "") {
+  const result: Record<string, string> = {};
+
+  parseCSS(`*{${style}}`).walkDecls((rule) => {
+    result[rule.prop.replace(/-./, (m) => m[1].toUpperCase())] = rule.value;
+  });
+
+  return result;
 }
