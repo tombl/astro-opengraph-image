@@ -1,9 +1,9 @@
 import { renderAsync } from "@resvg/resvg-js";
 import { decodeHTML } from "entities";
 import lz from "lz-string";
-import satori from "satori";
+import satori, { type Font } from "satori";
 import { html } from "satori-html";
-import type { Options } from "./integration";
+import type { Options } from "./types";
 
 interface VNode {
   type: string;
@@ -24,7 +24,7 @@ function decodeEntities(node: VNode) {
   }
 }
 
-export async function convert(url: URL, options: Options) {
+export async function convert(url: URL, options: Options, fonts: Font[]) {
   const data = url.searchParams.get("html");
   if (data === null) {
     console.warn("Missing html search param");
@@ -40,7 +40,7 @@ export async function convert(url: URL, options: Options) {
   const svg = await satori(root, {
     width: options.width / options.scale,
     height: options.height / options.scale,
-    fonts: options.fonts,
+    fonts,
   });
 
   const image = await renderAsync(svg, {

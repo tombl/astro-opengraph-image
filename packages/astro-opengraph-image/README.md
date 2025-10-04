@@ -27,11 +27,22 @@ npm install @fontsource/inter
 
 ```javascript
 // Then, update your astro.config.{mjs|ts} file to configure the integration:
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import opengraphImage from "astro-opengraph-image";
-import { readFile } from "node:fs/promises";
 
 export default defineConfig({
+  experimental: {
+    fonts: [
+      {
+        name: "Inter",
+        cssVariable: "--font-inter",
+        provider: fontProviders.fontsource(),
+        weights: ["400", "700"],
+        styles: ["normal"],
+      },
+    ],
+  },
+
   integrations: [
     opengraphImage({
       // what color do you want your background to be?
@@ -43,27 +54,6 @@ export default defineConfig({
       width: 1200,
       height: 630,
       scale: 3,
-
-      // the fonts you picked before. you will have to include the particular
-      // weights and variants you want to use.
-      fonts: [
-        {
-          name: "Inter",
-          data: await readFile(
-            "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff",
-          ),
-          style: "normal",
-          weight: 400,
-        },
-        {
-          name: "Inter",
-          data: await readFile(
-            "node_modules/@fontsource/inter/files/inter-latin-700-normal.woff",
-          ),
-          style: "normal",
-          weight: 700,
-        },
-      ],
     }),
   ],
 });
@@ -74,6 +64,7 @@ export default defineConfig({
 // Lastly, inside your <head>, render the OgImage component to
 // specify what you want in your image:
 
+import { Font } from "astro:assets";
 import { OgImage } from "astro-opengraph-image/components";
 ---
 
@@ -81,11 +72,14 @@ import { OgImage } from "astro-opengraph-image/components";
 <html>
   <head>
     ...
+    <Font cssVariable="--font-inter" />
     <OgImage>
       <h1>the page</h1>
       <p>this is the page</p>
       <style is:inline>
-        h1 {
+        h1,
+        p {
+          font-family: "Inter", sans-serif;
           color: red;
         }
       </style>
