@@ -46,6 +46,9 @@ export default function ogImage(options: Options): AstroIntegration {
         updateConfig({
           vite: {
             plugins: [vitePluginVirtualOptions(options)],
+            ssr: {
+              external: ["@resvg/resvg-js"],
+            },
           },
         });
       },
