@@ -70,6 +70,7 @@ describe("in dev", () => {
     expect(url).toStartWith("http://localhost");
 
     const image = await fetch(url);
+    expect(image.status).toEqual(200);
     const blob = await image.blob();
     expect(blob.type).toEqual("image/png");
     expect((await blob.bytes()).join(" ")).toEqual(snapshotImage);
@@ -106,6 +107,7 @@ describe.each(["static", "server"])("output: %s", (output) => {
           const { pathname, search } = new URL(url);
 
           const image = await server.fetch(pathname + search);
+          expect(image.status).toEqual(200);
           const blob = await image.blob();
           expect(blob.type).toEqual("image/png");
           expect((await blob.bytes()).join(" ")).toEqual(snapshotImage);
