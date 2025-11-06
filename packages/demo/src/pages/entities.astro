@@ -1,4 +1,4 @@
----
+import { Font } from "astro:assets";
 import { OgImage } from "astro-opengraph-image/components";
 ---
 
@@ -6,11 +6,14 @@ import { OgImage } from "astro-opengraph-image/components";
 <html>
   <head>
     <title>the page</title>
+    <Font cssVariable="--font-inter" />
     <OgImage>
       <h1>entity&amp;test</h1>
       <p>{"a<>=^&z"}</p>
       <style is:inline>
-        * {
+        h1,
+        p {
+          font-family: "Inter", sans-serif;
           color: white;
         }
       </style>

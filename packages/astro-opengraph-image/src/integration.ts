@@ -7,16 +7,17 @@ import { fileURLToPath } from "node:url";
 import type { Font } from "satori";
 import type { Plugin } from "vite";
 import { convert } from "./convert";
+import { loadFontsForBuild } from "./fonts";
+import type { FontReference, Options, RuntimeConfig } from "./types";
 
-export interface Options {
-  background: string;
-  width: number;
-  height: number;
-  scale: number;
-  fonts: Font[];
-}
+export type { Options } from "./types";
 
 export default function ogImage(options: Options): AstroIntegration {
+  let runtimeConfig: RuntimeConfig = {
+    options: sanitizeOptions(options),
+    fonts: [],
+  };
+
   return {
     name: "og-image",
     hooks: {
@@ -30,6 +31,8 @@ export default function ogImage(options: Options): AstroIntegration {
         // if we're in dev, or have an ssr adapter, we are allowed to emit
         // the _og route. in the case of a truly static build, injectRoute will fail
         // but is not necessary given we'll traverse the output anyway.
+        runtimeConfig = createRuntimeConfig(options, config.experimental?.fonts);
+
         if (command !== "dev" && !config.adapter) return;
 
         injectRoute({
@@ -45,18 +48,24 @@ export default function ogImage(options: Options): AstroIntegration {
         });
         updateConfig({
           vite: {
-            plugins: [vitePluginVirtualOptions(options)],
+            plugins: [vitePluginVirtualConfig(runtimeConfig)],
           },
         });
       },
       async "astro:build:done"({ assets, dir }) {
         const ogDir = new URL("_og/", dir);
+        const fonts = await loadFontsForBuild(runtimeConfig.fonts, dir);
 
         await Promise.all(
           [...assets]
             .flatMap(([, files]) => files)
             .map((file) =>
-              transformFilePostBuild(fileURLToPath(file), options, ogDir),
+              transformFilePostBuild(
+                fileURLToPath(file),
+                runtimeConfig,
+                fonts,
+                ogDir,
+              ),
             ),
         );
       },
@@ -64,7 +73,7 @@ export default function ogImage(options: Options): AstroIntegration {
   };
 }
 
-function vitePluginVirtualOptions(options: Options): Plugin {
+function vitePluginVirtualConfig(config: RuntimeConfig): Plugin {
   return {
     name: "og-image:config",
     resolveId(id) {
@@ -74,7 +83,7 @@ function vitePluginVirtualOptions(options: Options): Plugin {
     },
     load(id) {
       if (id === "\0og-image:config") {
-        return `export default ${JSON.stringify(stringify(options))}`;
+        return `export default ${JSON.stringify(stringify(config))}`;
       }
     },
   };
@@ -82,7 +91,8 @@ function vitePluginVirtualOptions(options: Options): Plugin {
 
 async function transformFilePostBuild(
   file: string,
-  options: Options,
+  config: RuntimeConfig,
+  fonts: Font[],
   ogDir: URL,
 ) {
   const rewriter = new HTMLRewriter();
@@ -97,7 +107,7 @@ async function transformFilePostBuild(
       const url = new URL(content);
       if (url.pathname !== "/_og") return;
 
-      const png = await convert(url, options);
+      const png = await convert(url, config.options, fonts);
       if (!png) return;
 
       const hash = createHash("sha256").update(png).digest("base64url");
@@ -112,4 +122,45 @@ async function transformFilePostBuild(
   const input = await readFile(file, "utf-8");
   const output = rewriter.transform(new Response(input));
   await writeFile(file, await output.text());
+}
+
+function createRuntimeConfig(
+  options: Options,
+  experimentalFonts: unknown,
+): RuntimeConfig {
+  return {
+    options: sanitizeOptions(options),
+    fonts: collectFontReferences(experimentalFonts),
+  };
+}
+
+function sanitizeOptions(options: Options): Options {
+  return {
+    background: options.background,
+    width: options.width,
+    height: options.height,
+    scale: options.scale,
+  };
+}
+
+function collectFontReferences(source: unknown): FontReference[] {
+  if (!Array.isArray(source)) return [];
+
+  const seen = new Set<string>();
+  const fonts: FontReference[] = [];
+
+  for (const item of source) {
+    if (!item || typeof item !== "object") continue;
+    const name = Reflect.get(item, "name");
+    const cssVariable = Reflect.get(item, "cssVariable");
+    if (typeof name !== "string" || typeof cssVariable !== "string") continue;
+    if (seen.has(cssVariable)) continue;
+    seen.add(cssVariable);
+    fonts.push({
+      name,
+      cssVariable: cssVariable as FontReference["cssVariable"],
+    });
+  }
+
+  return fonts;
 }
