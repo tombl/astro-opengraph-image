@@ -1,4 +1,4 @@
-import { renderAsync } from "@resvg/resvg-js";
+import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import { decodeHTML } from "entities";
 import lz from "lz-string";
 import satori from "satori";
@@ -24,6 +24,8 @@ function decodeEntities(node: VNode) {
   }
 }
 
+let initialized: Promise<void> | null = null;
+
 export async function convert(url: URL, options: Options) {
   const data = url.searchParams.get("html");
   if (data === null) {
@@ -43,11 +45,21 @@ export async function convert(url: URL, options: Options) {
     fonts: options.fonts,
   });
 
-  const image = await renderAsync(svg, {
+  await (initialized ??= initWasm(
+    import.meta.resolve("@resvg/resvg-wasm/index_bg.wasm"),
+  ));
+
+  const resvg = new Resvg(svg, {
     fitTo: { mode: "zoom", value: options.scale },
     font: { loadSystemFonts: false },
     background: options.background,
   });
+  const image = resvg.render();
 
-  return image.asPng();
+  try {
+    return image.asPng();
+  } finally {
+    image.free();
+    resvg.free();
+  }
 }

@@ -11,7 +11,7 @@ const options = parse(options_) as Options;
 export async function GET(context: APIContext) {
   const png = await convert(context.url, options);
   if (!png) return new Response(null, { status: 400 });
-  return new Response(png, {
+  return new Response(new Uint8Array(png), {
     headers: {
       "Content-Type": "image/png",
     },

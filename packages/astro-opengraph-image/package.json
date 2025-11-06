@@ -24,7 +24,7 @@
     "src"
   ],
   "dependencies": {
-    "@resvg/resvg-js": "^2.6.2",
+    "@resvg/resvg-wasm": "^2.6.2",
     "@worker-tools/html-rewriter": "^0.1.0-pre.19",
     "devalue": "^5.1.1",
     "entities": "^6.0.0",

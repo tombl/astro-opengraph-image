@@ -5,7 +5,6 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import type { Font } from "satori";
-import type { Plugin } from "vite";
 import { convert } from "./convert";
 
 export interface Options {
@@ -64,15 +63,15 @@ export default function ogImage(options: Options): AstroIntegration {
   };
 }
 
-function vitePluginVirtualOptions(options: Options): Plugin {
+function vitePluginVirtualOptions(options: Options) {
   return {
     name: "og-image:config",
-    resolveId(id) {
+    resolveId(id: string) {
       if (id === "og-image:config") {
         return "\0og-image:config";
       }
     },
-    load(id) {
+    load(id: string) {
       if (id === "\0og-image:config") {
         return `export default ${JSON.stringify(stringify(options))}`;
       }
